@@ -1,4 +1,4 @@
-import re
+import re, httpagentparser
 from datetime import datetime
 
 LIST_SET = []
@@ -53,28 +53,57 @@ def pageviewparameters(log):
 	view = []
 	if '200' in LIST_SET:
 		[view.append(y) for y in test_var if y[2] == '200']
-	print view[0:10]
-	print len(view)
-	print view[0][3]
-	print view[1][1]
-	print view[2][1]
+	#print view[0:10]
+	#print len(view)
+	#print view[0][3]
+	#print view[1][1]
+	#print view[2][1]
 	time_filter = []
 	totalurl = []
 	uni_url = []
 	enteries_in_view = len(view)
-	print enteries_in_view
+	#print enteries_in_view
 	for x in xrange(enteries_in_view):
 		time_filter.append(re.findall(r'\d+/\w+/\d+:(\d+:\d+:\d+)\s', view[x][1]))
 		totalurl.append(view[x][3])
-	print view[0][3]
-	print time_filter[0]
-	print time_filter[1]
-	print time_filter[2]
+	#print view[0][3]
+	#print time_filter[0]
+	#print time_filter[1]
+	#print time_filter[2]
 	#print totalurl
-	uni_url = set(totalurl)
-	print 'hiiiiii'
+	uni_url = list(set(totalurl))
+	
+	#print view[0][4]
+	user_ag = httpagentparser.simple_detect(view[0][4])
+	#print user_ag[1]
+	
+	z=0
+	boundvar = 0
+	count_list = []
+	print 'hhhhhhhhhi'
+	print view[0][3]
+	
 	print uni_url
-		
+	print 'hiiiiii'
+	
+	for x in uni_url[0:1]:
+		for y in view:
+			if x == y[3]:
+				count_list.append(y)
+		size_list = len(count_list)
+		print count_list[0]
+		print count_list[1]
+		for k in 
+			if boundvar < size_list:
+				if count_list[boundvar] != :
+				pass
+	print'2222222222222'
+	print count_list[0]
+	#print count_list[len(count_list)-2:len(count_list)]
+	#print count_list
+	#return
+	
+				
 	s1 = time_filter[0][0]
 	#print s1
 	s2 = time_filter[2][0]
