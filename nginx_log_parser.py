@@ -2,6 +2,8 @@ __author__ = "Abhishek Singh Sambyal"
 __email__ = "abhishek.sambyal@gmail.com"
 __license__ = "GNU GENERAL PUBLIC LICENSE Version 3"
 
+# Usuage: python nginx_log_parser.py
+
 import re, httpagentparser, time
 from datetime import datetime
 
