@@ -2,12 +2,16 @@ __author__ = "Abhishek Singh Sambyal"
 __email__ = "abhishek.sambyal@gmail.com"
 __license__ = "GNU GENERAL PUBLIC LICENSE Version 3"
 
-import re, httpagentparser
+import re, httpagentparser, time
 from datetime import datetime
 
+
+# Global Variable: store distinct HTTP statuses
 LIST_SET = []
 
-#Counting total enteries
+
+# Counting total enteries
+# Parameter: log: example.log file
 def count(log):
 	number_of_entry = 0
 	for line in log.xreadlines():
@@ -15,209 +19,189 @@ def count(log):
 	print '--------------------Number of enteries: --------------------\n' + str(number_of_entry)
 
 
-#Total no of failures
+# Total no of failures
+# Parameter: log: example.log file
 def failure(log):
 	fails = 0
-	match = re.findall(r'(GET\s.+\s\w+/.+"\s)([\d]+)\s', log.read())
+	
+	# Find all the occurrences of 
+	match = re.findall(r'GET\s.+\s\w+/.+"\s([\d]+)\s', log.read())
 		
-	#Number of failures
+	# Number of failures
 	for x in match:
-		if x[1] != '200': 
+		if x != '200': 
 			fails = fails + 1
 	print '\n--------------------Failures: --------------------\n' + str(fails)
 
 
-#HTTP Status codes and their occurrences
+# HTTP Status codes and their occurrences
+# Parameter: log: example.log file
 def http_status(log):
+	
+	# Find all the statuses in the log file
 	status = re.findall(r'(GET\s.+\s\w+/.+"\s)([\d]+)\s', log.read())
 	
-	#converting set to list 
+	# Store distinct values of statuses
 	global LIST_SET
 	LIST_SET = list(set([x[1] for x in status]))
 	
-	#printing the status code and the number of their occurrences
-	print '\n--------------------HTTP Status codes and their occurrences--------------------\n'
+	# Print the status code and number of their occurrences
+	print '\n--------------------HTTP Status codes and their occurrences--------------------'
 	for a in xrange(len(LIST_SET)):
 		print LIST_SET[a] + ': ' + str(([x[1] for x in status]).count(LIST_SET[a]))
 
 
-	
+# Find number of unique page visits on a URL
+# Parameters: log: example.log file, N: time interval in seconds
 def pageviewparameters(log, N):
 	global LIST_SET
-	total = re.findall(r'(\d+.\d+.\d+.\d+)\s-\s-\s\[(.+)\]\s\"GET\s.+\s\w+/.+\"\s(\d+)\s\d+\s\"(.+)\"\s\"(.+)\"',log.read())
-	a = set(total)
-	test_var = total[0:2005]
 	
-	# Creating all the valid visits which have 200 HTTP status
+	# Find all occurrences of IP address, HTTP Status code, URL, User agent
+	total = re.findall(r'(\d+.\d+.\d+.\d+)\s-\s-\s\[(.+)\]\s\"GET\s.+\s\w+/.+\"\s(\d+)\s\d+\s\"(.+)\"\s\"(.+)\"',log.read())
+	
+	# Create all the valid visits which have 200 HTTP status
+	# "view" variable will have all the enteries with HTTP status 200
 	view = []
-	if '200' in LIST_SET:
-		[view.append(y) for y in test_var if y[2] == '200']
-	#print '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-	#print view[-3:-1]
-	totalurl = []
-	uni_url = []
+	[view.append(y) for y in total if y[2] == '200']
 	enteries_in_view = len(view)
 	
-	#Collecting all the urls in log file
+	# Collect all url's
+	totalurl = []
+	
+	# Keep only unique url's
+	uni_url = []
+	
+	# Collect all the urls
 	for x in xrange(enteries_in_view):
 		totalurl.append(view[x][3])
-	#print '0000000000000000000000000'
-	#print totalurl
 	
-	# Unique url in total url using set
+	# Keep unique urls
 	uni_url = list(set(totalurl))
 	
-	#print view[0][4]
-	user_ag = httpagentparser.simple_detect(view[0][4])
-	#print user_ag[1]
-		
+	# Collect all the enteries of each url
 	count_list = []
-	#print 'hhhhhhhhhi'
-	#print view[0][3]
-	      
-	#time_filter = []
-	#print uni_url
-	#print 'hiiiiii'
+	
+	# Collect enteries of URL which have unique views
 	unique_urls = []
-	######print '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-	#########print uni_url
-	count_list = []
+	
 	print '\n--------------------URL\'s and Unique Views--------------------\n'
+	
+	# Check for every unique URL
 	for x in uni_url:
-		#######print '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-		########print x
 		count_list = []
+		
+		# Check every entry with status 200
 		for y in view:
-			#print '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-			#print y
-			#raw_input()
+			
+			# Check field URL with every unique URL
 			if y[3].rstrip() == x.rstrip():
-				#######print 'yessssssssss'
+				# IF true, store entry
 				count_list.append(y)
-			#print '+++++++++++++++++++++++++++++++Count list+++++++++++++++++++++++++++++++++++++++++++'
-			#print count_list
-		#######raw_input()
-		#######print count_list
-		#######raw_input()
+		
+		# Size of all entries of HTTP 200 with 'x' URL
 		size_list = len(count_list)
-		#boundvar = 1
+		
 		check = 0
 		url_count = 0
 		first_count = 0
+		
+		# Check size_list has more than 1 entry
 		if size_list > 1:
+			
+			# 
 			for k in count_list[1:]:
-				#print '-------------------k---------------'
-				#print k
-				# print '-------------------input field _ next---------------'
-				ipfield_next = k[0]
-				#print ipfield_next
-				#print"-----------count_list------------"
-				#print count_list
-				#print '------------url_count----------------'
-				#print url_count
-				#print '------------first_count----------------'
-				#print first_count
-				#Checking if IP address of two consecutive positions
+				
+				# Store first entry as unique_url view list
 				if first_count == 0:
 					unique_urls.append(count_list[0])
 					first_count = 1
-				#print '------------first_count----------------'
-				#print first_count
-				#print '------------unique_urls----------------'
-				#print unique_urls[url_count][0]
-				#print unique_urls
-				#print '------------url_count----------------'
-				#print url_count
+				
+				# Store next entry
+				ipfield_next = k[0]
+				
+				# Check current entry and next entry IP addresses
 				if unique_urls[url_count][0] == ipfield_next:
-					#print '---------------------------------YYYYYYYYYYYYYYYYYSSSSSSSSSSSSSSSSS ipfield'
-					#User Agent
+					
+					# Current entry user agent
 					user_agent1 = httpagentparser.simple_detect(unique_urls[url_count][4])
+					
+					# Next entry user agent
 					user_agent2 = httpagentparser.simple_detect(k[4])
+					
+					# Check current and next user agent values
 					if user_agent1[0] == user_agent2[0] and user_agent1[1] == user_agent2[1]:
-				#		print '---------------------------------YYYYYYYYYYYYYYYYYSSSSSSSSSSSSSSSSS user_agent'
-				#		print"----------user_agent1-------------"
-				#		print user_agent1
-				#		print"---------user_agent2------------"
-				#		print user_agent2
-				#		print '------------url_count----------------'
-				#		print url_count
+						
 						# Find the time between the two requests
 						first_time = re.search(r'\d+/\w+/\d+:(\d+:\d+:\d+)\s', unique_urls[url_count][1])
-				#		print '---------first_time---------'
-				#		print first_time.group(1)
 						second_time = re.search(r'\d+/\w+/\d+:(\d+:\d+:\d+)\s', k[1])
-				#		print '---------second_time---------'
-				#		print second_time.group(1)						
 						FMT = '%H:%M:%S'
 						tdelta = datetime.strptime(second_time.group(1), FMT) - datetime.strptime(first_time.group(1), FMT)
 						diff_in_time = getSec(str(tdelta))
-				#		print '-----------------time difference------------'
-				#		print diff_in_time
-				#		print '------------url_count----------------'
-				#		print url_count
 	
 						# If time between two requests are greater than the input time, consider it a unique visit
 						if diff_in_time > N:
-				#			print '---------------------------------YYYYYYYYYYYYYYYYYSSSSSSSSSSSSSSSSS difference'
-				#			print '------------unique_urls----------------'
+							
+							# Store it as a unique view
 							unique_urls.append(k)
-				#			print unique_urls
-				#			print '------------url_count----------------'
 							url_count = url_count + 1
-				#			print url_count
+						
+						# If time is lesser than the given input discard that view and continue
 						else:
-				#			print"---------unique_urls--------------"
-				#			print unique_urls
 							continue
+					
+					# If user agents are different
+					# Store it as a unique view
+					else:
+						unique_urls.append(k)
+						url_count = url_count + 1
+						
+				# If IP addresses are different
+				# Store it as a unique view
 				else:
 					unique_urls.append(k)
-					#######print"---------unique_urls--------------"
-					#######print unique_urls
 					url_count = url_count + 1
-					#######print"---------unique_count--------------"
-					#######print url_count
-			#######print"---00000000000000000000------unique_urls-----00000000000000000000000000---------"
-			#######print ""
-			#######print ""
-			#######print str(len(unique_urls))
-			#raw_input()
+			
+			# Display URL's and their unique visits
 			print unique_urls[0][3], ' :', str(len(unique_urls))
-			#raw_input()
-			#print unique_urls[0][3] + ' : ' + str(len(unique_urls))
+			
 			unique_urls = []
-			#print"---------unique_urls--------------"
-			#print unique_urls
-			#break
 			count_list = []
-			#######raw_input()
+			
+		# Only 1 URL with HTTP 200 Status
+		# Cosider is a unique visit
 		else:
 			print count_list[0][3], " : ", str(1)	
+
 
 # Calculate the seconds
 def getSec(s):
     l = s.split(':')
     return int(l[0]) * 3600 + int(l[1]) * 60 + int(l[2])
-	
+
+
 def main():
-	
-	## reading log file 
+	start_time = time.time()
+	# Reading log file 
 	logfile = open('example.log', 'r')
 	
-	#Counting total log enteries
+	# Counting total log enteries
 	count(logfile)
 	logfile.seek(0)
 	
-	#Processing faliures
+	# Processing faliures
 	failure(logfile)
 	logfile.seek(0)
 	
-	#Number of log enteries by HTTP status code
+	# Number of log enteries by HTTP status code
 	http_status(logfile)
 	logfile.seek(0)
 	
+	#URL and Unique visits
 	pageviewparameters(logfile, 1)
 	
 	logfile.close()
+	print("--- %s seconds ---" % (time.time() - start_time))
+
 
 if __name__ == '__main__':
 	main()
