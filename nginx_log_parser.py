@@ -188,7 +188,7 @@ def main():
 	start_time = time.time()
 	# Reading log file 
 	try:
-		logfile = open('exwqample.log', 'r')
+		logfile = open('example.log', 'r')
 		
 		# Counting total log enteries
 		count(logfile)
