@@ -55,6 +55,10 @@ def http_status(log):
 
 # Find number of unique page visits on a URL
 # Parameters: log: example.log file, N: time interval in seconds
+
+# This subroutine creates a list of all the enteries of status code 200
+# and takes each url with unique views.
+# Diffent IP address, different time(difference more than N sec), different user agents is considered a unique visit. 
 def pageviewparameters(log, N):
 	global LIST_SET
 	
@@ -92,10 +96,10 @@ def pageviewparameters(log, N):
 	for x in uni_url:
 		count_list = []
 		
-		# Check every entry with status 200
+		# Check entry with status 200
 		for y in view:
 			
-			# Check field URL with every unique URL
+			# Make a list of URL
 			if y[3].rstrip() == x.rstrip():
 				# IF true, store entry
 				count_list.append(y)
@@ -110,7 +114,6 @@ def pageviewparameters(log, N):
 		# Check size_list has more than 1 entry
 		if size_list > 1:
 			
-			# 
 			for k in count_list[1:]:
 				
 				# Store first entry as unique_url view list
@@ -184,25 +187,28 @@ def getSec(s):
 def main():
 	start_time = time.time()
 	# Reading log file 
-	logfile = open('example.log', 'r')
-	
-	# Counting total log enteries
-	count(logfile)
-	logfile.seek(0)
-	
-	# Processing faliures
-	failure(logfile)
-	logfile.seek(0)
-	
-	# Number of log enteries by HTTP status code
-	http_status(logfile)
-	logfile.seek(0)
-	
-	#URL and Unique visits
-	pageviewparameters(logfile, 1)
-	
-	logfile.close()
-	print("--- %s seconds ---" % (time.time() - start_time))
+	try:
+		logfile = open('exwqample.log', 'r')
+		
+		# Counting total log enteries
+		count(logfile)
+		logfile.seek(0)
+		
+		# Processing faliures
+		failure(logfile)
+		logfile.seek(0)
+		
+		# Number of log enteries by HTTP status code
+		http_status(logfile)
+		logfile.seek(0)
+		
+		#URL and Unique visits
+		pageviewparameters(logfile, 1)
+		
+		logfile.close()
+		print("--- %s seconds ---" % (time.time() - start_time))
+	except IOError:
+		print "The input file does not exist, please check the path. \nExiting gracefully"
 
 
 if __name__ == '__main__':
