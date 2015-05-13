@@ -175,7 +175,7 @@ def pageviewparameters(log, N):
 			print count_list[0][3], " : ", str(1)	
 
 
-# Calculate the seconds
+# Calculate seconds
 def getSec(s):
     l = s.split(':')
     return int(l[0]) * 3600 + int(l[1]) * 60 + int(l[2])
