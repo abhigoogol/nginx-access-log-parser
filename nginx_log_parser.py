@@ -4,8 +4,13 @@ __license__ = "GNU GENERAL PUBLIC LICENSE Version 3"
 
 # Usuage: python nginx_log_parser.py
 
-import re, httpagentparser, time
+import re, time
 from datetime import datetime
+
+try:
+	import httpagentparser
+except ImportError:
+	raise ImportError('httpagentparser module didn\'t load')
 
 
 # Global Variable: store distinct HTTP statuses
@@ -26,8 +31,11 @@ def count(log):
 def failure(log):
 	fails = 0
 	
-	# Find all the occurrences of 
-	match = re.findall(r'GET\s.+\s\w+/.+"\s([\d]+)\s', log.read())
+	try:
+		# Find all the occurrences of HTTP Status code
+		match = re.findall(r'GET\s.+\s\w+/.+"\s([\d]+)\s', log.read())
+	except:
+		raise TypeError("The file HTTP status format is different.")
 		
 	# Number of failures
 	for x in match:
@@ -40,9 +48,12 @@ def failure(log):
 # Parameter: log: example.log file
 def http_status(log):
 	
-	# Find all the statuses in the log file
-	status = re.findall(r'(GET\s.+\s\w+/.+"\s)([\d]+)\s', log.read())
-	
+	try:
+		# Find all the statuses in the log file
+		status = re.findall(r'(GET\s.+\s\w+/.+"\s)([\d]+)\s', log.read())
+	except:
+		raise TypeError("The file GET and HTTP status format is different.")
+		
 	# Store distinct values of statuses
 	global LIST_SET
 	LIST_SET = list(set([x[1] for x in status]))
@@ -62,9 +73,12 @@ def http_status(log):
 def pageviewparameters(log, N):
 	global LIST_SET
 	
-	# Find all occurrences of IP address, HTTP Status code, URL, User agent
-	total = re.findall(r'(\d+.\d+.\d+.\d+)\s-\s-\s\[(.+)\]\s\"GET\s.+\s\w+/.+\"\s(\d+)\s\d+\s\"(.+)\"\s\"(.+)\"',log.read())
-	
+	try:
+		# Find all occurrences of IP address, HTTP Status code, URL, User agent
+		total = re.findall(r'(\d+.\d+.\d+.\d+)\s-\s-\s\[(.+)\]\s\"GET\s.+\s\w+/.+\"\s(\d+)\s\d+\s\"(.+)\"\s\"(.+)\"',log.read())
+	except:
+		raise TypeError("The file format is different.")
+		
 	# Create all the valid visits which have 200 HTTP status
 	# "view" variable will have all the enteries with HTTP status 200
 	view = []
@@ -136,9 +150,13 @@ def pageviewparameters(log, N):
 					# Check current and next user agent values
 					if user_agent1[0] == user_agent2[0] and user_agent1[1] == user_agent2[1]:
 						
-						# Find the time between the two requests
-						first_time = re.search(r'\d+/\w+/\d+:(\d+:\d+:\d+)\s', unique_urls[url_count][1])
-						second_time = re.search(r'\d+/\w+/\d+:(\d+:\d+:\d+)\s', k[1])
+						try:
+							# Find the time between the two requests
+							first_time = re.search(r'\d+/\w+/\d+:(\d+:\d+:\d+)\s', unique_urls[url_count][1])
+							second_time = re.search(r'\d+/\w+/\d+:(\d+:\d+:\d+)\s', k[1])
+						except:
+							raise TypeError("The file day and date format is different.")	
+							
 						FMT = '%H:%M:%S'
 						tdelta = datetime.strptime(second_time.group(1), FMT) - datetime.strptime(first_time.group(1), FMT)
 						diff_in_time = getSec(str(tdelta))
@@ -180,36 +198,37 @@ def pageviewparameters(log, N):
 
 # Calculate seconds
 def getSec(s):
-    l = s.split(':')
-    return int(l[0]) * 3600 + int(l[1]) * 60 + int(l[2])
+    temp = s.split(':')
+    return int(temp[0]) * 3600 + int(temp[1]) * 60 + int(temp[2])
 
 
 def main():
 	start_time = time.time()
+	
 	# Reading log file 
 	try:
-		logfile = open('exwqample.log', 'r')
-		
-		# Counting total log enteries
-		count(logfile)
-		logfile.seek(0)
-		
-		# Processing faliures
-		failure(logfile)
-		logfile.seek(0)
-		
-		# Number of log enteries by HTTP status code
-		http_status(logfile)
-		logfile.seek(0)
-		
-		#URL and Unique visits
-		pageviewparameters(logfile, 1)
-		
-		logfile.close()
-		print("--- %s seconds ---" % (time.time() - start_time))
+		logfile = open('example.log', 'r')
 	except IOError:
-		print "The input file does not exist, please check the path. \nExiting gracefully"
-
+		raise IOError('The input file does not exist, please check the path.')
+		
+	# Counting total log enteries
+	count(logfile)
+	logfile.seek(0)
+	
+	# Processing faliures
+	failure(logfile)
+	logfile.seek(0)
+	
+	# Number of log enteries by HTTP status code
+	http_status(logfile)
+	logfile.seek(0)
+	
+	#URL and Unique visits
+	pageviewparameters(logfile, 1)
+	
+	logfile.close()
+	print("--- %s seconds ---" % (time.time() - start_time))
+	
 
 if __name__ == '__main__':
 	main()
