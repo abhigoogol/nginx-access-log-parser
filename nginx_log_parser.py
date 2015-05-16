@@ -152,17 +152,17 @@ def pageviewparameters(log, N):
 						
 						try:
 							# Find the time between the two requests
-							first_time = re.search(r'\d+/\w+/\d+:(\d+:\d+:\d+)\s', unique_urls[url_count][1])
-							second_time = re.search(r'\d+/\w+/\d+:(\d+:\d+:\d+)\s', k[1])
+							first_time = re.search(r'(\d+/\w+/\d+:\d+:\d+:\d+)\s', unique_urls[url_count][1])
+							second_time = re.search(r'(\d+/\w+/\d+:\d+:\d+:\d+)\s', k[1])
 						except:
 							raise TypeError("The file day and date format is different.")	
 							
-						FMT = '%H:%M:%S'
+						FMT = '%d/%b/%Y:%H:%M:%S'
 						tdelta = datetime.strptime(second_time.group(1), FMT) - datetime.strptime(first_time.group(1), FMT)
-						diff_in_time = getSec(str(tdelta))
-	
+						total_sec = tdelta.total_seconds()
+						
 						# If time between two requests are greater than the input time, consider it a unique visit
-						if diff_in_time > N:
+						if total_sec > N:
 							
 							# Store it as a unique view
 							unique_urls.append(k)
@@ -196,12 +196,6 @@ def pageviewparameters(log, N):
 			print count_list[0][3], " : ", str(1)	
 
 
-# Calculate seconds
-def getSec(s):
-    temp = s.split(':')
-    return int(temp[0]) * 3600 + int(temp[1]) * 60 + int(temp[2])
-
-
 def main():
 	start_time = time.time()
 	
@@ -227,7 +221,7 @@ def main():
 	pageviewparameters(logfile, 1)
 	
 	logfile.close()
-	print("--- %s seconds ---" % (time.time() - start_time))
+	print "--- %s seconds ---" % (time.time() - start_time)
 	
 
 if __name__ == '__main__':
