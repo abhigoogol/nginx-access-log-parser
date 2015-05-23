@@ -4,14 +4,13 @@ __license__ = "GNU GENERAL PUBLIC LICENSE Version 3"
 
 # Usuage: python nginx_log_parser.py
 
-import re, time
+import re, time, traceback
 from datetime import datetime
 
 try:
 	import httpagentparser
 except ImportError:
-	raise ImportError('httpagentparser module didn\'t load')
-
+	print(traceback.format_exc())
 
 # Global Variable: store distinct HTTP statuses
 LIST_SET = []
@@ -19,7 +18,7 @@ LIST_SET = []
 
 # Counting total enteries
 # Parameter: log: example.log file
-def count(log):
+def count_enteries(log):
 	number_of_entry = 0
 	for line in log.xreadlines():
 		number_of_entry = number_of_entry + 1
@@ -28,7 +27,7 @@ def count(log):
 
 # Total no of failures
 # Parameter: log: example.log file
-def failure(log):
+def failure_enteries(log):
 	fails = 0
 	
 	try:
@@ -70,7 +69,7 @@ def http_status(log):
 # This subroutine creates a list of all the enteries of status code 200
 # and takes each url with unique views.
 # Diffent IP address, different time(difference more than N sec), different user agents is considered a unique visit. 
-def pageviewparameters(log, N):
+def pagevisits(log, N):
 	global LIST_SET
 	
 	try:
@@ -200,25 +199,36 @@ def main():
 	start_time = time.time()
 	
 	# Reading log file 
-	try:
-		logfile = open('example.log', 'r')
-	except IOError:
-		raise IOError('The input file does not exist, please check the path.')
-		
+	logfile = open('example.log', 'r')
+	
 	# Counting total log enteries
-	count(logfile)
+	try:
+		count_enteries(logfile)
+	except:
+		print(traceback.format_exc())
 	logfile.seek(0)
 	
 	# Processing faliures
-	failure(logfile)
+	try:
+		failure_enteries(logfile)
+	except:
+		print(traceback.format_exc())
 	logfile.seek(0)
 	
 	# Number of log enteries by HTTP status code
-	http_status(logfile)
+	try:
+		http_status(logfile)
+	except:
+		print(traceback.format_exc())
 	logfile.seek(0)
 	
 	#URL and Unique visits
-	pageviewparameters(logfile, 1)
+	# Second argument is the number of seconds each page  visit
+	try:
+		pagevisits(logfile, 1)
+	except:
+		print(traceback.format_exc())
+	logfile.seek(0)
 	
 	logfile.close()
 	print "--- %s seconds ---" % (time.time() - start_time)
