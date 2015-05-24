@@ -1,5 +1,5 @@
 # nginx-access-log-parser
-nginx access log parser program that analyses logs and produces statistics.
+nginx access log parser program analyses logs and produces statistics.
 - Number of log entries processed
 - Processing failures
 - Number Log entries by HTTP status code
